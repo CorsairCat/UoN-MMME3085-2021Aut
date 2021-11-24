@@ -127,7 +127,7 @@ void loop()
 
             // STEPS 3 and 5														  
             // Step 3 
-            p1 = ((float)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * accelSteps);
+            p1 = ((float)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * maxAccel);
             // Step 5
             R = ((float)maxAccel) / (ticksPerSec * ticksPerSec);
             // Calculate initial value of and p1 and R    Set p = p1 

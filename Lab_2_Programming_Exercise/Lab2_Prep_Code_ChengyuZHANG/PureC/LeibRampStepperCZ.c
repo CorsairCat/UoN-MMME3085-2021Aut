@@ -79,8 +79,9 @@ int main()
         // Define number of steps in acceleration phase using Equation (3) 
         maxSpeed = maxPermissSpeed;
 		accelSteps= (maxSpeed * maxSpeed - minSpeed * minSpeed) /(2 * maxAccel);
-		
+        
         stepsToGo = computeStepsToGo();
+
         //maxSpeed = maxPermissSpeed;
         if (2 * accelSteps > stepsToGo)
         {
@@ -93,7 +94,7 @@ int main()
 
 		// STEPS 3 and 5														  
         // Step 3 
-        p1 = ((float)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * accelSteps);
+        p1 = ((float)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * maxAccel);
         // Step 5
         R = ((float)maxAccel) / (ticksPerSec * ticksPerSec);
         // Calculate initial value of and p1 and R    Set p = p1 

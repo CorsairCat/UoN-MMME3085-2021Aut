@@ -178,11 +178,13 @@ void moveOneStep()
         if (direction == FWDS)
         {
         /* Is something missing here? */
+        digitalWrite(dirPin, HIGH);
         currentPosition++;
         }
         else
         {
         /* Is something missing here? */
+        digitalWrite(dirPin, LOW);
         currentPosition--;
         }
         delayMicroseconds(stepLengthMus);

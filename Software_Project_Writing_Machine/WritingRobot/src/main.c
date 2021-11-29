@@ -12,6 +12,12 @@
 #define bdrate 115200               /* 115200 baud */
 
 void SendCommands (char *buffer );
+// create font g code index
+int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[]);
+// create the next line of g code to be executed
+int updateGcodeTargetPosition(int gcodeLineNum, int currentXOffset, int currentYOffset, char gCodeCommand[ ], int lastTimeReturnValue);
+// update the offset of 0,0 point for next character
+int updateCharactorOffsetPosition(int *tempOffsetX, int *tempOffsetY);
 
 int main()
 {
@@ -87,3 +93,5 @@ void SendCommands (char *buffer )
     Sleep(100); // Can omit this when using the writing robot but has minimal effect
     // getch(); // Omit this once basic testing with emulator has taken place
 }
+
+int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[]);

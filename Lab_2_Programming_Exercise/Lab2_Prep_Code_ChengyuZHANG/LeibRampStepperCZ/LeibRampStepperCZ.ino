@@ -13,7 +13,7 @@
    Example 4 - Receive a number as text and convert it to an int
    Modified to read a long */
 
-// #define USEINTERRUPTS
+#define USEINTERRUPTS
 const int stepPin = 13;
 const int dirPin = 9;
 const bool FWDS = true;
@@ -235,6 +235,10 @@ void computeNewSpeed()
     // update p to new
     p = p * (1 + q + 1.5 * q * q);
     // if p > p1, p = p1
+    if (p < ps)
+    {
+        p = ps;
+    }
     if (p > p1)
     {
         p = p1;
@@ -375,5 +379,3 @@ ISR(TIMER1_COMPA_vect)
     computeNewSpeed();
 }
 #endif
-
-

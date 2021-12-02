@@ -23,10 +23,10 @@
 2. Lab 2: Motion Control
     + Marks: [<font color="#c1693c">Not Marked</font>]
     + Weight: <font color="#2eaadf">10%</font> 
-    + In Proc Tasks:
-        * Prep Exercise [<font color="#c1693c">Not Marked</font>] [<font color="#2eaadf">5%</font>
+    + Finished Tasks:
+        * Prep Exercise [<font color="#00aa91">95 / 100</font>] [<font color="#2eaadf">5%</font>
 ] 
-    + UnStarted Tasks:
+    + In Proc Tasks:
         * Lab Complex Questions [<font color="#4e4f97">Not Started</font>] [<font color="#2eaadf">5%</font>
 ] 
 

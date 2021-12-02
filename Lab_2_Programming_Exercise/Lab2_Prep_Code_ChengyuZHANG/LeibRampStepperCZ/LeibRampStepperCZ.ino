@@ -13,7 +13,7 @@
    Example 4 - Receive a number as text and convert it to an int
    Modified to read a long */
 
-#define USEINTERRUPTS
+//#define USEINTERRUPTS
 const int stepPin = 13;
 const int dirPin = 9;
 const bool FWDS = true;
@@ -23,7 +23,6 @@ const long ticksPerSec = 16000000; // Clock speed of Arduino
 #else
 const long ticksPerSec = 1000000; // microseconds in this case
 #endif
-
 
 /* Define permissible parameters for motor */
 // For testing by watching LED: try movements in order of 100 steps
@@ -112,7 +111,7 @@ void loop()
             // STEP 1																 
             // Define number of steps in acceleration phase using Equation (3) 
             maxSpeed = maxPermissSpeed;
-            accelSteps= (maxSpeed * maxSpeed - minSpeed * minSpeed) /(2 * maxAccel);
+            accelSteps= (maxSpeed * maxSpeed - minSpeed * minSpeed) /(2 * (double)maxAccel);
             
             stepsToGo = computeStepsToGo();
             //maxSpeed = maxPermissSpeed;
@@ -122,19 +121,19 @@ void loop()
                 // Define maximum speed in profile and number of steps in acceleration phase 
                 // Use Equations (4) and (5)
                 maxSpeed = sqrt(minSpeed * minSpeed + maxAccel * stepsToGo);
-                accelSteps = (float) (long) stepsToGo / 2;
+                accelSteps = (long) (stepsToGo / 2);
             }
 
             // STEPS 3 and 5														  
             // Step 3 
-            p1 = ((float)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * maxAccel);
+            p1 = ((double)ticksPerSec) / sqrt(minSpeed * minSpeed + 2 * maxAccel);
             // Step 5
-            R = ((float)maxAccel) / (ticksPerSec * ticksPerSec);
+            R = ((double)maxAccel) / ((double)ticksPerSec * (double)ticksPerSec);
             // Calculate initial value of and p1 and R    Set p = p1 
             p = p1;
 
             // Step 4
-            ps = ((float)ticksPerSec) / maxSpeed; //  STEP 4: leave it as it is.
+            ps = ((double)ticksPerSec) / maxSpeed; //  STEP 4: leave it as it is.
             
             
             /* End of pre-computation code                                            */
@@ -201,7 +200,7 @@ void computeNewSpeed()
     /* ----------------------------------------------------------------- */
     /* Start of on-the-fly step calculation code, executed once per step */
     /* Add Leib Ramp code here										   */
-        float m;
+        double m;
     //  STEP 6a														  
     if (stepsToGo == 0)
     {
@@ -230,7 +229,7 @@ void computeNewSpeed()
     }
     
     // STEP 6b, c and d using Equations (12) and (13)  
-    float q;
+    double q;
     q = m * p * p;
     // update p to new
     p = p * (1 + q + 1.5 * q * q);

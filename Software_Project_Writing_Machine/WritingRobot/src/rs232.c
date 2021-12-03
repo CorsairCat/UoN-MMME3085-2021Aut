@@ -532,7 +532,6 @@ void RS232_flushRXTX(int comport_number)
 
 
 #else  /* windows */
-
 #define RS232_PORTNR  16
 
 HANDLE Cport[RS232_PORTNR];

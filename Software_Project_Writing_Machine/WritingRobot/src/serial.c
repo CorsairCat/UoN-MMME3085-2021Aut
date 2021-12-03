@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "serial.h"
-#include "rs232.h"
-
+#include "include/serial.h"
 
 //#define Serial_Mode
 
 #ifdef Serial_Mode
+#include "include/rs232.h"
 
 // Open port with checking
 int CanRS232PortBeOpened ( void )

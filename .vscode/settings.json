@@ -3,6 +3,8 @@
         "*.cjson": "jsonc",
         "*.wxss": "css",
         "*.wxs": "javascript",
-        "rs232.h": "c"
+        "rs232.h": "c",
+        "stdio.h": "c",
+        "serial.h": "c"
     }
 }

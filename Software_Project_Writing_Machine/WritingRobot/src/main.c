@@ -1,29 +1,38 @@
 //  define if it is testing mode
 //  __TEST_MODE__ or __RELEASE_MODE__
+//#define __RELEASE_MODE__
 #define __TEST_MODE__
 // define IO head file
 #include <stdio.h>
 #include <stdlib.h>
 //#include <conio.h>
 //#include <windows.h>
-#include "include/rs232.h"
+#ifdef __RELEASE_MODE__
+    #include "include/rs232.h"
+    #define Serial_Mode
+#endif
 #include "include/serial.h"
+// define the function prototype
+#include "include/main.h"
 
 #define bdrate 115200               /* 115200 baud */
 
-void SendCommands (char *buffer );
-// create font g code index
-int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[]);
-// create the next line of g code to be executed
-int updateGcodeTargetPosition(int gcodeLineNum, int currentXOffset, int currentYOffset, char gCodeCommand[ ], int lastTimeReturnValue);
-// update the offset of 0,0 point for next character
-int updateCharactorOffsetPosition(int *tempOffsetX, int *tempOffsetY);
+// define the global const number
+#define _LINE_HEIGHT_OFFSET_ 18
 
 int main()
 {
 
     //char mode[]= {'8','N','1',0};
     char buffer[100];
+
+    //_________ Start Define of the Variables
+    int outputOffsetX = 0;
+    int outputOffsetY = 0;
+    // font index array
+    struct FontIndex FontIndexArray[128];
+
+    //_________ Initial the RS232 Serial Port
 
     // If we cannot open the port then give up immediately
     if ( CanRS232PortBeOpened() == -1 )
@@ -32,17 +41,21 @@ int main()
         exit (0);
     }
 
+    //_________ Initial the machine
+
     // Time to wake up the robot
     printf ("\nAbout to wake up the robot\n");
 
     // We do this by sending a new-line
     sprintf (buffer, "\n");
-     // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
+    // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
     PrintBuffer (&buffer[0]);
     Sleep(100);
 
     // This is a special case - we wait  until we see a dollar ($)
     WaitForDollar();
+
+    //________ Here ends the initial of machine
 
     printf ("\nThe robot is now ready to draw\n");
 
@@ -94,4 +107,8 @@ void SendCommands (char *buffer )
     // getch(); // Omit this once basic testing with emulator has taken place
 }
 
-int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[]);
+// genrerate the index from the file
+int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[])
+{
+    return 0;
+}

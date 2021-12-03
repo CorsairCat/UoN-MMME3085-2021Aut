@@ -1,7 +1,7 @@
 //  define if it is testing mode
-//  __TEST_MODE__ or __RELEASE_MODE__
+//  __DEBUG_MODE__ or __RELEASE_MODE__
 //#define __RELEASE_MODE__
-#define __TEST_MODE__
+#define __DEBUG_MODE__
 // define IO head file
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@
 #define bdrate 115200               /* 115200 baud */
 
 // define the global const number
-#define _LINE_HEIGHT_OFFSET_ 18
+#define _LINE_HEIGHT_OFFSET_ 30
 
 int main()
 {
@@ -31,6 +31,60 @@ int main()
     int outputOffsetY = 0;
     // font index array
     struct FontIndex FontIndexArray[128];
+    // all lines of font file
+    int fontFileLength = 0;
+    int *memForFontData = NULL;
+
+    // Generate the Index of font file and open the font file
+    FILE *fpFont = NULL;
+    // open font file
+    fpFont = fopen("../asset/font/SingleStrokeFont.txt", "r");
+    // genrerate the font index
+    if (fpFont != NULL)
+    {
+        fontFileLength = generateFontIndex(fpFont, FontIndexArray);
+        if (fontFileLength == 0)
+        {
+            // error handling
+            printf ("\nUnable to index the Font File\n");
+            exit (0);
+        }
+        else
+        {
+            // solve the font file from plain text to the int data in memory
+            // allocate memory
+            printf ("Trying to allocate %.2f kb memory...\n", (float) fontFileLength * 3 / 1024);
+            memForFontData = malloc(fontFileLength * 3 * sizeof(int));
+            // check if allocation works
+            if (memForFontData == NULL)
+            {
+                // error handling
+                printf ("Memory allocate Failed\n");
+                exit (0);
+            }
+            else
+            {
+                printf ("Successfully allocate %.2f kb memory\n", (float) fontFileLength * 3 / 1024);
+            }
+            // create the cache for the font file
+            fontFileLength = createFontDataCache(fpFont, memForFontData);
+            // error handling
+            if (fontFileLength < 0)
+            {
+                printf ("Failed to read the format of Font File\n");
+                exit (0);
+            }
+            else
+            {
+                printf ("Font Data has been translate successfully\n");
+            }
+        }
+    }
+    else
+    {
+        printf ("\nUnable to open the Font File\n");
+        exit (0);
+    }
 
     //_________ Initial the RS232 Serial Port
 
@@ -108,7 +162,74 @@ void SendCommands (char *buffer )
 }
 
 // genrerate the index from the file
-int generateFontIndex(FILE *filepointer, int fontGcodeLineIndex[])
+int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
 {
-    return 0;
+    char fontReadBuff[255];
+    // use this to reset the position of filepointer
+    int index_counter = 0;
+    int currentReadCharNum, charGcodeLength;
+    int currentBuffCharPos;
+    int *bufferCharPosPt;
+    while (fgets(fontReadBuff, 255, (FILE*)filePointer))
+    {
+        currentBuffCharPos = 0;
+        charGcodeLength = 0;
+        if (fontReadBuff[0] == (char)57 && fontReadBuff[1] == (char)57 && fontReadBuff[2] == (char)57 )
+        {
+            currentBuffCharPos = 4;
+            // convert the char's ascii num, max length = 3, start position is 4; (999 XXX)
+            bufferCharPosPt = &currentBuffCharPos;
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 3, &currentReadCharNum))
+            {
+                fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
+            }
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 4, &currentReadCharNum))
+            {
+                fontGcodeLineIndex[currentReadCharNum].line_num = charGcodeLength;
+            }
+        }
+        index_counter += 1;
+    }
+    // reset the file pointer to beginning
+    rewind(filePointer);
+    return index_counter;
+}
+
+int createFontDataCache(FILE *filePointer, int fontGcodeData[])
+{
+    rewind(filePointer);
+    char fontReadBuff[255];
+    // use this to reset the position of filepointer
+    int index_counter = 0;
+    int currentBuffCharPos;
+    int *bufferCharPosPt;
+    int tempResult;
+    while (fgets(fontReadBuff, 255, (FILE*)filePointer))
+    {
+        currentBuffCharPos = 0;
+        bufferCharPosPt = &currentBuffCharPos;
+        for (int i = 0; i < 3; i++)
+        {
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 6, &tempResult))
+            {
+                fontGcodeData[3*index_counter + i] = tempResult;
+            }
+            else
+            {
+                // failure generated
+                printf("Format Error Found in Line %d;\n", (index_counter+1));
+                index_counter = -1;
+                break;
+            }
+        }
+        if (index_counter < 0)
+        {
+            break;
+        }
+        else
+        {
+            index_counter += 1;
+        }
+    }
+    return index_counter;
 }

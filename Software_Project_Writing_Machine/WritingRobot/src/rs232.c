@@ -30,9 +30,9 @@
 
 /* For more info and how to use this library, visit: http://www.teuniz.net/RS-232/ */
 
+#ifndef __MACH__
 
 #include "rs232.h"
-
 
 #if defined(__linux__) || defined(__FreeBSD__)   /* Linux & FreeBSD */
 
@@ -896,7 +896,7 @@ int RS232_GetPortnr(const char *devname)
 }
 
 
-
+#endif
 
 
 

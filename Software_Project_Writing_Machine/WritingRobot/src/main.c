@@ -47,6 +47,7 @@ int main()
         {
             // error handling
             printf ("\nUnable to index the Font File\n");
+            fclose(fpFont);
             exit (0);
         }
         else
@@ -60,6 +61,7 @@ int main()
             {
                 // error handling
                 printf ("Memory allocate Failed\n");
+                fclose(fpFont);
                 exit (0);
             }
             else
@@ -72,6 +74,7 @@ int main()
             if (fontFileLength < 0)
             {
                 printf ("Failed to read the format of Font File\n");
+                fclose(fpFont);
                 exit (0);
             }
             else
@@ -83,8 +86,11 @@ int main()
     else
     {
         printf ("\nUnable to open the Font File\n");
+        fclose(fpFont);
         exit (0);
     }
+    // close the font file
+    fclose(fpFont);
 
     //_________ Initial the RS232 Serial Port
 
@@ -112,14 +118,8 @@ int main()
     //________ Here ends the initial of machine
 
     printf ("\nThe robot is now ready to draw\n");
-
-        //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
-    sprintf (buffer, "G1 X0 Y0 F1000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "M3\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S0\n");
-    SendCommands(buffer);
+    // sending initial commands
+    initializeWritingMachine(buffer);
 
 
     // These are sample commands to draw out some information - these are the ones you will be generating.
@@ -148,6 +148,7 @@ int main()
 
     return (0);
 }
+
 
 // Send the data to the robot - note in 'PC' mode you need to hit space twice
 // as the dummy 'WaitForReply' has a getch() within the function.
@@ -232,4 +233,16 @@ int createFontDataCache(FILE *filePointer, int fontGcodeData[])
         }
     }
     return index_counter;
+}
+
+int initializeWritingMachine(char commandBuffer[])
+{
+    //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
+    sprintf (commandBuffer, "G1 X0 Y0 F1000\n");
+    SendCommands(commandBuffer);
+    sprintf (commandBuffer, "M3\n");
+    SendCommands(commandBuffer);
+    sprintf (commandBuffer, "S0\n");
+    SendCommands(commandBuffer);
+    return 0;
 }

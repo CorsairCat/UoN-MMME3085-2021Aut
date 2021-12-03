@@ -12,6 +12,8 @@ void SendCommands (char *buffer );
 int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[]);
 // create the int format g code data in memory from the text font file;
 int createFontDataCache(FILE *filePointer, int fontGcodeData[]);
+// send initial commands to writing robots
+int initializeWritingMachine();
 // create the next line of g code to be executed
 int updateGcodeTargetPosition(int gcodeLineNum, int currentXOffset, int currentYOffset, char gCodeCommand[], int lastTimeReturnValue);
 // update the offset of 0,0 point for next character

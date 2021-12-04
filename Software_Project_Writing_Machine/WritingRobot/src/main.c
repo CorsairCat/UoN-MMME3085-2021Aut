@@ -18,8 +18,8 @@
 #define bdrate 115200               /* 115200 baud */
 
 // define the global const number
-#define _LINE_HEIGHT_OFFSET_ 30
-#define _MAX_LINE_WIDTH_ 200
+#define _LINE_HEIGHT_OFFSET_ 36
+#define _MAX_LINE_WIDTH_ 600
 
 int main()
 {
@@ -57,7 +57,7 @@ int main()
             exit (0);
         }
         else
-        {
+        {   
             // solve the font file from plain text to the int data in memory
             // allocate memory
             printf ("Trying to allocate %.2f kb memory...\n", (float) fontFileLength * 3 / 1024);
@@ -189,11 +189,11 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
             currentBuffCharPos = 4;
             // convert the char's ascii num, max length = 3, start position is 4; (999 XXX)
             bufferCharPosPt = &currentBuffCharPos;
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 3, &currentReadCharNum))
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &currentReadCharNum))
             {
                 fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
             }
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 4, &charGcodeLength))
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &charGcodeLength))
             {
                 fontGcodeLineIndex[currentReadCharNum].line_num = charGcodeLength;
             }
@@ -265,7 +265,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
     // set the machine to offset with pen up
     sprintf (commandBuffer, "S0\n");
     SendCommands(commandBuffer);
-    sprintf (commandBuffer, "G1 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetY);
+    sprintf (commandBuffer, "G0 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetY);
     SendCommands(commandBuffer);
     for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
     {
@@ -296,7 +296,6 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
 
 int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
 {
-    *tempOffsetY += commandHeightChange;
     if ((*tempOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
     {
         *tempOffsetX += commandWidthChange;
@@ -305,6 +304,11 @@ int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, doub
     {
         // line change
         *tempOffsetY += globalScaler * _LINE_HEIGHT_OFFSET_;
+        *tempOffsetX = 0;
+    }
+    if (commandHeightChange != 0)
+    {
+        *tempOffsetY -= commandHeightChange;
         *tempOffsetX = 0;
     }
     return 1;

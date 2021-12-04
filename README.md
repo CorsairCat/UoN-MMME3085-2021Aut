@@ -42,3 +42,6 @@
 ## Final Test
 + Marks: [<font color="#4e4f97">Not Started</font>]
 + Weight: <font color="#2eaadf">45%</font>
+
+## Tools
++ online G code simulator: https://www.tomasw.com/gcodesim/

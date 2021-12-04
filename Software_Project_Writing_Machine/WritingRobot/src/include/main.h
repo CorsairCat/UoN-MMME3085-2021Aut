@@ -49,14 +49,16 @@ int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, i
     {
         tempNum = numarray[*startPosition + i] - 48;
         // verify if its a num
-        if (tempNum < 10 && tempNum >= 0)
+        if (tempNum >= 0 && tempNum < 10)
         {
             readCharNum = readCharNum * 10 + tempNum;
+            //printf("current num is %d, added result is %d; \n", tempNum, readCharNum);
         }
         // dealing with - leading negative value
         else if (tempNum == -3 && i == 0)
         {
             isNegative = 1;
+            readCharNum = 0;
         }
         else
         {

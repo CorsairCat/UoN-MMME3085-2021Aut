@@ -145,7 +145,7 @@ void CloseRS232Port (void)
 // JIB: you MUST specify variable types in function definitions
 int PrintBuffer (char *buffer)
 {
-    printf("%s \n",buffer);
+    printf("%s",buffer);
     return (0);
 }
 
@@ -154,7 +154,7 @@ int WaitForReply (void)
 {
     //char c;
     //c = getchar();
-    getchar();
+    //getchar();
     return (0);
 }
 

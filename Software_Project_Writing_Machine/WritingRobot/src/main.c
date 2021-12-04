@@ -303,12 +303,12 @@ int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, doub
     else
     {
         // line change
-        *tempOffsetY += globalScaler * _LINE_HEIGHT_OFFSET_;
+        *tempOffsetY -= globalScaler * _LINE_HEIGHT_OFFSET_;
         *tempOffsetX = 0;
     }
     if (commandHeightChange != 0)
     {
-        *tempOffsetY -= commandHeightChange;
+        *tempOffsetY += commandHeightChange;
         *tempOffsetX = 0;
     }
     return 1;

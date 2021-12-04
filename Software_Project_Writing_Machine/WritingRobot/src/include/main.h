@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// define the global const number
+#define _LINE_HEIGHT_OFFSET_ 36
+#define _MAX_LINE_WIDTH_ 600
+#define _DEFAULT_FONT_WIDTH_ 18
+
 // define the structure of font index
 struct FontIndex {
     int start_line;
@@ -43,7 +48,8 @@ int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, i
 // utility function for convert a char array less than length of 4 to a int
 int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, int *returnValue)
 {
-    int readCharNum, isNegative = 0;
+    int readCharNum = 0;
+    int isNegative = 0;
     int tempNum;
     for (int i = 0; i < charLength; i++)
     {
@@ -58,7 +64,7 @@ int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, i
         else if (tempNum == -3 && i == 0)
         {
             isNegative = 1;
-            readCharNum = 0;
+            //readCharNum = 0;
         }
         else
         {

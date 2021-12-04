@@ -17,10 +17,6 @@
 
 #define bdrate 115200               /* 115200 baud */
 
-// define the global const number
-#define _LINE_HEIGHT_OFFSET_ 36
-#define _MAX_LINE_WIDTH_ 600
-
 int main()
 {
 
@@ -40,7 +36,12 @@ int main()
     // all lines of font file
     int fontFileLength = 0;
     int *memForFontData = NULL;
-
+    // initial index of font to avoid non define issue
+    for (int i = 0; i < 128; i++)
+    {
+        FontIndexArray[i].start_line = 0;
+        FontIndexArray[i].line_num = 0;
+    }
     // Generate the Index of font file and open the font file
     FILE *fpFont = NULL;
     // open font file
@@ -52,7 +53,15 @@ int main()
         if (fontFileLength == 0)
         {
             // error handling
-            printf ("\nUnable to index the Font File\n");
+            printf ("Unable to index the Font File\n");
+            fclose(fpFont);
+            exit (0);
+        }
+        else if (fontFileLength < 0)
+        {
+            // error handling
+            printf ("Format Error Detected in the Font File, line %d\n", -fontFileLength);
+            printf ("Reason: Index exceed the basic ASCII limit (1 - 128)\n");
             fclose(fpFont);
             exit (0);
         }
@@ -62,6 +71,7 @@ int main()
             // allocate memory
             printf ("Trying to allocate %.2f kb memory...\n", (float) fontFileLength * 3 / 1024);
             memForFontData = malloc(fontFileLength * 3 * sizeof(int));
+            memset(memForFontData, 0, fontFileLength * 3);
             // check if allocation works
             if (memForFontData == NULL)
             {
@@ -91,7 +101,7 @@ int main()
     }
     else
     {
-        printf ("\nUnable to open the Font File\n");
+        printf ("Unable to open the Font File\n");
         fclose(fpFont);
         exit (0);
     }
@@ -152,7 +162,8 @@ int main()
     // Before we exit the program we need to close the COM port
     CloseRS232Port();
     printf("Com port now closed\n");
-    
+    free(memForFontData);
+    printf("Font cache cleared\n");
     fclose(fpText);
 
     return (0);
@@ -191,7 +202,15 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
             bufferCharPosPt = &currentBuffCharPos;
             if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &currentReadCharNum))
             {
-                fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
+                if (currentReadCharNum >= 0 && currentReadCharNum < 128)
+                {
+                    fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
+                }
+                else
+                {
+                    index_counter = -1 - index_counter;
+                    break;
+                }
             }
             if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &charGcodeLength))
             {
@@ -262,34 +281,44 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
     double currentFontHeight = 0;
     int tempLineNum = 0;
     int penStatus = 0; // reset to 0 for each input
-    // set the machine to offset with pen up
-    sprintf (commandBuffer, "S0\n");
-    SendCommands(commandBuffer);
-    sprintf (commandBuffer, "G0 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetY);
-    SendCommands(commandBuffer);
-    for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
+    // add a error handling here to avoid non character g code
+    if (fontIndexArray[charAsciiNum].start_line >= 0)
     {
-        tempLineNum = fontIndexArray[charAsciiNum].start_line + exeCommand + 1;
-        if (fontDataCache[tempLineNum * 3 + 2] != penStatus)
+        // set the machine to offset with pen up
+        sprintf (commandBuffer, "S0\n");
+        SendCommands(commandBuffer);
+        sprintf (commandBuffer, "G0 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetY);
+        SendCommands(commandBuffer);
+        for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
         {
-            sprintf (commandBuffer, "S%d\n", fontDataCache[tempLineNum * 3 + 2] * 1000);
-            SendCommands(commandBuffer);
-            penStatus = fontDataCache[tempLineNum * 3 + 2];
-            // keep in same line
-            exeCommand -= 1;
-        }
-        else
-        {
-            sprintf (commandBuffer, "G%d X%f Y%f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetY + Scaler * fontDataCache[tempLineNum * 3 + 1]);
-            SendCommands(commandBuffer);
-        }
-        if (exeCommand == fontIndexArray[charAsciiNum].line_num - 1)
-        {
-            // last line
-            currentFontWidth = Scaler * fontDataCache[tempLineNum * 3];
-            currentFontHeight = Scaler * fontDataCache[tempLineNum * 3 + 1];
+            tempLineNum = fontIndexArray[charAsciiNum].start_line + exeCommand + 1;
+            if (fontDataCache[tempLineNum * 3 + 2] != penStatus)
+            {
+                sprintf (commandBuffer, "S%d\n", fontDataCache[tempLineNum * 3 + 2] * 1000);
+                SendCommands(commandBuffer);
+                penStatus = fontDataCache[tempLineNum * 3 + 2];
+                // keep in same line
+                exeCommand -= 1;
+            }
+            else
+            {
+                sprintf (commandBuffer, "G%d X%f Y%f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetY + Scaler * fontDataCache[tempLineNum * 3 + 1]);
+                SendCommands(commandBuffer);
+            }
+            if (exeCommand == fontIndexArray[charAsciiNum].line_num - 1)
+            {
+                // last line
+                currentFontWidth = Scaler * fontDataCache[tempLineNum * 3];
+                currentFontHeight = Scaler * fontDataCache[tempLineNum * 3 + 1];
+            }
         }
     }
+    else
+    {
+        // jump to next words position if this code is not defined
+        currentFontWidth = Scaler * _DEFAULT_FONT_WIDTH_;
+        currentFontHeight = 0;
+    }    
     updateCharactorOffsetPosition(tempOffsetX, tempOffsetY, currentFontWidth, currentFontHeight, Scaler);
     return 1;
 }

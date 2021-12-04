@@ -1,0 +1,41 @@
+# depslib dependency file v1.0
+1638652583 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\main.c
+	<stdio.h>
+	<stdlib.h>
+	"include/rs232.h"
+	"include/serial.h"
+	"include/main.h"
+
+1638652583 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\rs232.h
+	<stdio.h>
+	<string.h>
+	<termios.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<limits.h>
+	<sys/file.h>
+	<errno.h>
+	<windows.h>
+
+1638652583 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\serial.h
+	<stdio.h>
+	<string.h>
+
+1638652583 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\main.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<unistd.h>
+
+1638652583 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\serial.c
+	<stdio.h>
+	<stdlib.h>
+	"include/serial.h"
+	"include/rs232.h"
+
+1638652682 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\rs232.c
+	"include/rs232.h"
+

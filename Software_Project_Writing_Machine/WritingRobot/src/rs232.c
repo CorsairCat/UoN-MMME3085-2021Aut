@@ -32,7 +32,7 @@
 
 #ifndef __MACH__
 
-#include "rs232.h"
+#include "include/rs232.h"
 
 #if defined(__linux__) || defined(__FreeBSD__)   /* Linux & FreeBSD */
 

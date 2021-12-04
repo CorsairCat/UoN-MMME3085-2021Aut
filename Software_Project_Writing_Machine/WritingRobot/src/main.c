@@ -265,7 +265,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
     // set the machine to offset with pen up
     sprintf (commandBuffer, "S0\n");
     SendCommands(commandBuffer);
-    sprintf (commandBuffer, "G1 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetX);
+    sprintf (commandBuffer, "G1 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetY);
     SendCommands(commandBuffer);
     for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
     {
@@ -280,7 +280,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
         }
         else
         {
-            sprintf (commandBuffer, "G%d X%f Y%f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3 + 1]);
+            sprintf (commandBuffer, "G%d X%f Y%f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetY + Scaler * fontDataCache[tempLineNum * 3 + 1]);
             SendCommands(commandBuffer);
         }
         if (exeCommand == fontIndexArray[charAsciiNum].line_num - 1)

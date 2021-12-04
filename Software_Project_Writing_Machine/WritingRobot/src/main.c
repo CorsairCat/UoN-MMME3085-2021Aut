@@ -19,6 +19,7 @@
 
 // define the global const number
 #define _LINE_HEIGHT_OFFSET_ 30
+#define _MAX_LINE_WIDTH_ 200
 
 int main()
 {
@@ -27,8 +28,13 @@ int main()
     char buffer[100];
 
     //_________ Start Define of the Variables
-    int outputOffsetX = 0;
-    int outputOffsetY = 0;
+    double outputOffsetX = 0;
+    double outputOffsetY = 0;
+    double generalScaler = 1; // scale the size of the word
+    int machineZaxisState = 0; // 0 is up, 1000 is down
+    char charReadyToWrite;
+    double currentFontHeight = 0;
+    double currentFontWidth = 0;
     // font index array
     struct FontIndex FontIndexArray[128];
     // all lines of font file
@@ -92,6 +98,21 @@ int main()
     // close the font file
     fclose(fpFont);
 
+    // ask user to set the golbal scaler
+    printf("Enter the Scale size of the font: ");
+    scanf("%lf", &generalScaler);
+
+    // initialize the text file needs to print out
+    FILE *fpText = NULL;
+    // open text file
+    fpText = fopen("../test/SampleLines.txt", "r");
+    if (fpText == NULL)
+    {
+        // error hanbling
+        printf("Failed to open the text file\n");
+        exit(0);
+    }
+
     //_________ Initial the RS232 Serial Port
 
     // If we cannot open the port then give up immediately
@@ -121,30 +142,18 @@ int main()
     // sending initial commands
     initializeWritingMachine(buffer);
 
+    machineZaxisState = 0;
 
-    // These are sample commands to draw out some information - these are the ones you will be generating.
-    sprintf (buffer, "G0 X-13.41849 Y0.000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S1000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41849 Y-4.28041\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41849 Y0.0000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41089 Y4.28041\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S0\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G0 X-7.17524 Y0\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S1000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G0 X0 Y0\n");
-    SendCommands(buffer);
+    while ((charReadyToWrite = (char) fgetc(fpText)) != EOF)
+    {
+        generateCharGcodeCommand(charReadyToWrite, &outputOffsetX, &outputOffsetY, buffer, memForFontData, FontIndexArray, generalScaler);
+    }
 
     // Before we exit the program we need to close the COM port
     CloseRS232Port();
     printf("Com port now closed\n");
+    
+    fclose(fpText);
 
     return (0);
 }
@@ -184,7 +193,7 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
             {
                 fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
             }
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 4, &currentReadCharNum))
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 4, &charGcodeLength))
             {
                 fontGcodeLineIndex[currentReadCharNum].line_num = charGcodeLength;
             }
@@ -245,4 +254,58 @@ int initializeWritingMachine(char commandBuffer[])
     sprintf (commandBuffer, "S0\n");
     SendCommands(commandBuffer);
     return 0;
+}
+
+int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *tempOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler)
+{
+    double currentFontWidth = 0;
+    double currentFontHeight = 0;
+    int tempLineNum = 0;
+    int penStatus = 0; // reset to 0 for each input
+    // set the machine to offset with pen up
+    sprintf (commandBuffer, "S0\n");
+    SendCommands(commandBuffer);
+    sprintf (commandBuffer, "G1 X%f Y%f F1000\n", *tempOffsetX, *tempOffsetX);
+    SendCommands(commandBuffer);
+    for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
+    {
+        tempLineNum = fontIndexArray[charAsciiNum].start_line + exeCommand + 1;
+        if (fontDataCache[tempLineNum * 3 + 2] != penStatus)
+        {
+            sprintf (commandBuffer, "S%d\n", fontDataCache[tempLineNum * 3 + 2] * 1000);
+            SendCommands(commandBuffer);
+            penStatus = fontDataCache[tempLineNum * 3 + 2];
+            // keep in same line
+            exeCommand -= 1;
+        }
+        else
+        {
+            sprintf (commandBuffer, "G%d X%f Y%f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3 + 1]);
+            SendCommands(commandBuffer);
+        }
+        if (exeCommand == fontIndexArray[charAsciiNum].line_num - 1)
+        {
+            // last line
+            currentFontWidth = Scaler * fontDataCache[tempLineNum * 3];
+            currentFontHeight = Scaler * fontDataCache[tempLineNum * 3 + 1];
+        }
+    }
+    updateCharactorOffsetPosition(tempOffsetX, tempOffsetY, currentFontWidth, currentFontHeight, Scaler);
+    return 1;
+}
+
+int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
+{
+    *tempOffsetY += commandHeightChange;
+    if ((*tempOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
+    {
+        *tempOffsetX += commandWidthChange;
+    }
+    else
+    {
+        // line change
+        *tempOffsetY += globalScaler * _LINE_HEIGHT_OFFSET_;
+        *tempOffsetX = 0;
+    }
+    return 1;
 }

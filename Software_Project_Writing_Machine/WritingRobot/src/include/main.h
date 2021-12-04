@@ -15,9 +15,10 @@ int createFontDataCache(FILE *filePointer, int fontGcodeData[]);
 // send initial commands to writing robots
 int initializeWritingMachine();
 // create the next line of g code to be executed
-int updateGcodeTargetPosition(int gcodeLineNum, int currentXOffset, int currentYOffset, char gCodeCommand[], int lastTimeReturnValue);
+// scale, change offset, output
+int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *tempOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler);
 // update the offset of 0,0 point for next character
-int updateCharactorOffsetPosition(int *tempOffsetX, int *tempOffsetY);
+int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler);
 int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, int *returnValue);
 
 // verify for system to create sleep() capibility
@@ -61,11 +62,13 @@ int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, i
         {
             if (i == 0)
             {
+                // error handling
                 *returnValue = 0;
                 return 0;
             }
             else
             {
+                // ending and return the result
                 *startPosition += i + 1;
                 if (isNegative)
                 {

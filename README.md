@@ -1,7 +1,7 @@
 # MMME3085 Project and Labs
 ## Project List
 1. Writing Machine
-    + Marks: [<font color="#4e4f97">Not Started</font>]
+    + Marks: [<font color="#c1693c">Not Marked</font>]
     + Weight: <font color="#2eaadf">25%</font>
     + Finished Step: 
         * Planning (<font color="#db4d6d">22th Nov</font>) [<font color="#c1693c">Not Marked</font>] [<font color="#2eaadf">5%</font>]

@@ -1,3 +1,6 @@
+//  define if it is testing mode
+#include "include/utility.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 

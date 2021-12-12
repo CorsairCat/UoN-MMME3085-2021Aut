@@ -5,6 +5,7 @@
         "*.wxs": "javascript",
         "rs232.h": "c",
         "stdio.h": "c",
-        "serial.h": "c"
+        "serial.h": "c",
+        "utility.h": "c"
     }
 }

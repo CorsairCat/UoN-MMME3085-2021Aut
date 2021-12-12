@@ -1,15 +1,15 @@
 //  define if it is testing mode
 //  __DEBUG_MODE__ or __RELEASE_MODE__
-//#define __RELEASE_MODE__
-#define __DEBUG_MODE__
+#define __RELEASE_MODE__
+//#define __DEBUG_MODE__
 // define IO head file
 #include <stdio.h>
 #include <stdlib.h>
 //#include <conio.h>
 //#include <windows.h>
 #ifdef __RELEASE_MODE__
-    #include "include/rs232.h"
     #define Serial_Mode
+    #include "include/rs232.h"
 #endif
 #include "include/serial.h"
 // define the function prototype

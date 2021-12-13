@@ -34,6 +34,7 @@
 		<Unit filename="include/main.h" />
 		<Unit filename="include/rs232.h" />
 		<Unit filename="include/serial.h" />
+		<Unit filename="include/utility.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

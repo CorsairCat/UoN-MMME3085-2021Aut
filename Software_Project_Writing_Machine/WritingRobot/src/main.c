@@ -25,10 +25,8 @@ int main()
     double outputOffsetX = 0;
     double outputOffsetY = 0;
     double generalScaler = 1; // scale the size of the word
-    int machineZaxisState = 0; // 0 is up, 1000 is down
+    // int machineZaxisState = 0; // 0 is up, 1000 is down
     char charReadyToWrite;
-    double currentFontHeight = 0;
-    double currentFontWidth = 0;
     // font index array
     struct FontIndex FontIndexArray[128];
     // all lines of font file
@@ -64,7 +62,7 @@ int main()
             exit (0);
         }
         else
-        {   
+        {
             // solve the font file from plain text to the int data in memory
             // allocate memory
             printf ("Trying to allocate %.2f kb memory...\n", (float) fontFileLength * 3 / 1024);
@@ -150,7 +148,7 @@ int main()
     // sending initial commands
     initializeWritingMachine(buffer);
 
-    machineZaxisState = 0;
+    //machineZaxisState = 0;
 
     while ((charReadyToWrite = (char) fgetc(fpText)) != EOF)
     {
@@ -316,7 +314,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *temp
         // jump to next words position if this code is not defined
         currentFontWidth = Scaler * _DEFAULT_FONT_WIDTH_;
         currentFontHeight = 0;
-    }    
+    }
     updateCharactorOffsetPosition(tempOffsetX, tempOffsetY, currentFontWidth, currentFontHeight, Scaler);
     return 1;
 }

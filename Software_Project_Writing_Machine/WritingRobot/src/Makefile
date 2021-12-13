@@ -8,6 +8,6 @@ all:${OBJS} linkage
 %.c.o:%.c
 	@gcc ${CFLAGS} -c $< -o build/$@
 linkage:
-	@gcc -o main build/*.o
+	@gcc -o ../bin/main build/*.o
 clean:
 	@rm build/* 2> /dev/null || echo > /dev/nu

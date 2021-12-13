@@ -1,6 +1,5 @@
 //  define if it is testing mode
 #include "include/utility.h"
-//#define __DEBUG_MODE__
 // define IO head file
 #include <stdio.h>
 #include <stdlib.h>

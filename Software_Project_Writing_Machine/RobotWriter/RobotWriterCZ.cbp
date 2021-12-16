@@ -2,14 +2,14 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="WritingRobotCZ" />
+		<Option title="RobotWriterCZ" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../bin/WritingRobotCZ_Debug" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../bin" />
-				<Option object_output="build/Debug/" />
+				<Option output="bin/RobotWriterCZ_Debug" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="src/build/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -17,9 +17,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="../bin/WritingRobotCZ_Release" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../bin" />
-				<Option object_output="build/Release/" />
+				<Option output="bin/RobotWriterCZ_Release" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="src/build/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -33,17 +33,17 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="include/main.h" />
-		<Unit filename="include/rs232.h" />
-		<Unit filename="include/serial.h" />
-		<Unit filename="include/utility.h" />
-		<Unit filename="main.c">
+		<Unit filename="src/include/main.h" />
+		<Unit filename="src/include/rs232.h" />
+		<Unit filename="src/include/serial.h" />
+		<Unit filename="src/include/utility.h" />
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="rs232.c">
+		<Unit filename="src/rs232.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="serial.c">
+		<Unit filename="src/serial.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>

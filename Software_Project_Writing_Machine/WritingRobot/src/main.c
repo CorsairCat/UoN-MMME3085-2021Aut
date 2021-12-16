@@ -23,7 +23,7 @@ int main()
     //_________ Start Define of the Variables
     double outputOffsetX = 0;
     double outputOffsetY = 0;
-    double generalScaler = 1; // scale the size of the word
+    double generalScaler = 0.4; // scale the size of the word
     // int machineZaxisState = 0; // 0 is up, 1000 is down
     char charReadyToWrite;
     // font index array
@@ -110,7 +110,7 @@ int main()
     // initialize the text file needs to print out
     FILE *fpText = NULL;
     // open text file
-    fpText = fopen("../test/SampleLines.txt", "r");
+    fpText = fopen("../input/input.txt", "r");
     if (fpText == NULL)
     {
         // error hanbling

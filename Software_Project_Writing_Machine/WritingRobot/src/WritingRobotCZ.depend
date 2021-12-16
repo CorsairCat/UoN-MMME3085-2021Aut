@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1639353742 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\main.c
+1639678927 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\main.c
 	"include/utility.h"
 	<stdio.h>
 	<stdlib.h>
@@ -41,5 +41,5 @@
 1638652682 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\rs232.c
 	"include/rs232.h"
 
-1639353212 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\utility.h
+1639679093 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\utility.h
 

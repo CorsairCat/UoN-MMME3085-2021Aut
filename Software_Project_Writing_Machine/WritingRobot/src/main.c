@@ -104,8 +104,14 @@ int main()
     fclose(fpFont);
 
     // ask user to set the golbal scaler
-    printf("Enter the Scale size of the font: ");
+    printf("Enter the Scale size of the font (0.4 is a good default): ");
     scanf("%lf", &generalScaler);
+    while (generalScaler <= 0)
+    {
+        // error handle
+        printf("Scale size of the font should be positive:");
+        scanf("%lf", &generalScaler);
+    }
 
     // initialize the text file needs to print out
     FILE *fpText = NULL;

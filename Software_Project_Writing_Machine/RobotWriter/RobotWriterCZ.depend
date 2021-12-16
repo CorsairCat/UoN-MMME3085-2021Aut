@@ -43,3 +43,47 @@
 
 1639679093 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\writingrobot\src\include\utility.h
 
+1639679740 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\main.c
+	"include/utility.h"
+	<stdio.h>
+	<stdlib.h>
+	"include/rs232.h"
+	"include/serial.h"
+	"include/main.h"
+
+1639679917 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\include\utility.h
+
+1639679740 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\include\rs232.h
+	<stdio.h>
+	<string.h>
+	<termios.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<limits.h>
+	<sys/file.h>
+	<errno.h>
+	<windows.h>
+
+1639679740 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\include\serial.h
+	<stdio.h>
+	<string.h>
+
+1639679740 c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\include\main.h
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<unistd.h>
+
+1639679740 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\rs232.c
+	"include/rs232.h"
+
+1639679740 source:c:\users\zcy50\desktop\3085sourcecode\software_project_writing_machine\robotwriter\src\serial.c
+	"include/utility.h"
+	<stdio.h>
+	<stdlib.h>
+	"include/serial.h"
+	"include/rs232.h"
+

@@ -21,9 +21,9 @@ int createFontDataCache(FILE *filePointer, int fontGcodeData[]);
 int initializeWritingMachine();
 // create the next line of g code to be executed
 // scale, change offset, output
-int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *selectedOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler);
+int generateCharGcodeCommand(int charAsciiNum, double *currentOffsetX, double *currentOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler);
 // update the offset of 0,0 point for next character
-int updateCharactorOffsetPosition(double *selectedOffsetX, double *selectedOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler);
+int updateCharactorOffsetPosition(double *currentOffsetX, double *currentOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler);
 int convertCharArrayToInt(char numarray[], int *startPosition, int charLength, int *returnValue);
 
 // verify for system to create sleep() capibility

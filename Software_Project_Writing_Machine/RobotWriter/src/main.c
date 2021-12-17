@@ -321,7 +321,7 @@ int initializeWritingMachine(char commandBuffer[])
 }
 
 // execute the G code for a input Character
-int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *selectedOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler)
+int generateCharGcodeCommand(int charAsciiNum, double *currentOffsetX, double *currentOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler)
 {
     // variables to store the last g command code which is next offset 
     double currentFontWidth = 0;
@@ -338,7 +338,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *
         sprintf (commandBuffer, "S0\n");
         SendCommands(commandBuffer);
         // move the pen to the default offset position to avoid any problem which might occur
-        sprintf (commandBuffer, "G0 X%.3f Y%.3f F1000\n", *selectedOffsetX, *selectedOffsetY);
+        sprintf (commandBuffer, "G0 X%.3f Y%.3f F1000\n", *currentOffsetX, *currentOffsetY);
         SendCommands(commandBuffer);
         // use a for loop to execute the gcode stored in cache
         for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
@@ -361,7 +361,7 @@ int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *
             {
                 // if pen status didnt changed, just send the command to move the position 
                 // product the scaler to generate the correct position command 
-                sprintf (commandBuffer, "G%d X%.3f Y%.3f\n", penZAxisStatus, *selectedOffsetX + Scaler * fontDataCache[currentExecutedLineNum * 3], *selectedOffsetY + Scaler * fontDataCache[currentExecutedLineNum * 3 + 1]);
+                sprintf (commandBuffer, "G%d X%.3f Y%.3f\n", penZAxisStatus, *currentOffsetX + Scaler * fontDataCache[currentExecutedLineNum * 3], *currentOffsetY + Scaler * fontDataCache[currentExecutedLineNum * 3 + 1]);
                 SendCommands(commandBuffer);
             }
             // if the line is the last line of current character's g code, thus, just transfer the position into the offset moving variables
@@ -381,32 +381,32 @@ int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *
         currentFontHeight = 0;
     }
     // call the function to update the offset for next character
-    updateCharactorOffsetPosition(selectedOffsetX, selectedOffsetY, currentFontWidth, currentFontHeight, Scaler);
+    updateCharactorOffsetPosition(currentOffsetX, currentOffsetY, currentFontWidth, currentFontHeight, Scaler);
     return 1;
 }
 
 // flash the default offset for next character
-int updateCharactorOffsetPosition(double *selectedOffsetX, double *selectedOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
+int updateCharactorOffsetPosition(double *currentOffsetX, double *currentOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
 {
     // check if its meet the max available line width
-    if ((*selectedOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
+    if ((*currentOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
     {
         // if not exceed the limits, add the x increasement to the global offset
-        *selectedOffsetX += commandWidthChange;
+        *currentOffsetX += commandWidthChange;
     }
     else
     {
         // the width is exceed, 
         // line change is required
-        *selectedOffsetY -= globalScaler * _LINE_HEIGHT_OFFSET_;
-        *selectedOffsetX = 0;
+        *currentOffsetY -= globalScaler * _LINE_HEIGHT_OFFSET_;
+        *currentOffsetX = 0;
     }
     if (commandHeightChange != 0)
     {
         // if have height change, (example: \n)
         // the x should be move back to the start
-        *selectedOffsetY += commandHeightChange;
-        *selectedOffsetX = 0;
+        *currentOffsetY += commandHeightChange;
+        *currentOffsetX = 0;
     }
     return 1;
 }

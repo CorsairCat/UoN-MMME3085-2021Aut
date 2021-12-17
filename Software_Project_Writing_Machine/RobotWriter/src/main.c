@@ -16,7 +16,6 @@
 
 int main()
 {
-
     //char mode[]= {'8','N','1',0};
     char buffer[100];
 
@@ -31,12 +30,14 @@ int main()
     // all lines of font file
     int fontFileLength = 0;
     int *memForFontData = NULL;
+
     // initial index of font to avoid non define issue
     for (int i = 0; i < 128; i++)
     {
         FontIndexArray[i].start_line = 0;
         FontIndexArray[i].line_num = 0;
     }
+
     // Generate the Index of font file and open the font file
     FILE *fpFont = NULL;
     // open font file
@@ -44,17 +45,19 @@ int main()
     // genrerate the font index
     if (fpFont != NULL)
     {
+        // call the function to generate the index
         fontFileLength = generateFontIndex(fpFont, FontIndexArray);
+        // using the return value to identify any error during this process
         if (fontFileLength == 0)
         {
-            // error handling
+            // error handling if no index is created
             printf ("Unable to index the Font File\n");
             fclose(fpFont);
             exit (0);
         }
         else if (fontFileLength < 0)
         {
-            // error handling
+            // error handling if any error occured during the indexing
             printf ("Format Error Detected in the Font File, line %d\n", -fontFileLength);
             printf ("Reason: Index exceed the basic ASCII limit (1 - 128)\n");
             fclose(fpFont);
@@ -70,18 +73,19 @@ int main()
             // check if allocation works
             if (memForFontData == NULL)
             {
-                // error handling
+                // error handling if unable to use malloc()
                 printf ("Memory allocate Failed\n");
                 fclose(fpFont);
                 exit (0);
             }
             else
             {
+                // allocate success
                 printf ("Successfully allocate %.2f kb memory\n", (float) fontFileLength * 3 / 1024);
             }
             // create the cache for the font file
             fontFileLength = createFontDataCache(fpFont, memForFontData);
-            // error handling
+            // error handling if error happens during the convert
             if (fontFileLength < 0)
             {
                 printf ("Failed to read the format of Font File\n");
@@ -106,9 +110,10 @@ int main()
     // ask user to set the golbal scaler
     printf("Enter the Scale size of the font (0.4 is a good default): ");
     scanf("%lf", &generalScaler);
+    // check if its a vaild scaler number
     while (generalScaler <= 0)
     {
-        // error handle
+        // error handle if the scaler number is smaller than 0
         printf("Scale size of the font should be positive:");
         scanf("%lf", &generalScaler);
     }
@@ -154,17 +159,21 @@ int main()
     initializeWritingMachine(buffer);
 
     //machineZaxisState = 0;
-
+    // use fgetc to get next char inside the input file
+    // while the file pointer didnt reach the end of the file
     while ((charReadyToWrite = (char) fgetc(fpText)) != EOF)
     {
+        // call the function to generate the gcode of current character
         generateCharGcodeCommand(charReadyToWrite, &outputOffsetX, &outputOffsetY, buffer, memForFontData, FontIndexArray, generalScaler);
     }
 
     // Before we exit the program we need to close the COM port
     CloseRS232Port();
     printf("Com port now closed\n");
+    // free the memory allocated before
     free(memForFontData);
     printf("Font cache cleared\n");
+    // close the file of input
     fclose(fpText);
 
     return (0);
@@ -183,41 +192,58 @@ void SendCommands (char *buffer )
     // getch(); // Omit this once basic testing with emulator has taken place
 }
 
-// genrerate the index from the file
+// generate the index from the file
 int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
 {
+    // the buffer for storing the current line
     char fontReadBuff[255];
     // use this to reset the position of filepointer
     int index_counter = 0;
-    int currentReadCharNum, charGcodeLength;
-    int currentBuffCharPos;
+    // to accept the result from the convertion function
+    // which are the char's ASCII number and the g-code line length of this character
+    int currentCharASCII, charGcodeLength;
+    // record the position of the character
+    // this define where to start to convert string into integer
+    int startPosOfNextConvert;
+    // the pointer for transmit startPosOfNextConvert
     int *bufferCharPosPt;
+    // get one line of the font file
     while (fgets(fontReadBuff, 255, (FILE*)filePointer))
     {
-        currentBuffCharPos = 0;
+        // reset the position variables to 0 for a new circle
+        startPosOfNextConvert = 0;
         charGcodeLength = 0;
+        // check if this line is start with 999, which means this is the line define the start of a char and its g-code length
         if (fontReadBuff[0] == (char)57 && fontReadBuff[1] == (char)57 && fontReadBuff[2] == (char)57 )
         {
-            currentBuffCharPos = 4;
-            // convert the char's ascii num, max length = 3, start position is 4; (999 XXX)
-            bufferCharPosPt = &currentBuffCharPos;
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &currentReadCharNum))
+            // jump position to 4, because its 999 ASCII LENGTH
+            // ascii number starts from position 5
+            startPosOfNextConvert = 4;
+            bufferCharPosPt = &startPosOfNextConvert;
+            // convert the char's ascii num (max 128), max length = 3, start position is 4; (999 XXX)
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &currentCharASCII))
             {
-                if (currentReadCharNum >= 0 && currentReadCharNum < 128)
+                //check if the converted result is between 0 -127
+                if (currentCharASCII >= 0 && currentCharASCII < 128)
                 {
-                    fontGcodeLineIndex[currentReadCharNum].start_line = index_counter;
+                    // if its a char's ASCII, record it into the index array
+                    fontGcodeLineIndex[currentCharASCII].start_line = index_counter;
                 }
                 else
                 {
+                    // if not, it means something is wrong, record the error line number and return
                     index_counter = -1 - index_counter;
                     break;
                 }
             }
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 8, &charGcodeLength))
+            // if its correct, jump to the start of the length and convert it to integer
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &charGcodeLength))
             {
-                fontGcodeLineIndex[currentReadCharNum].line_num = charGcodeLength;
+                // record the length into the index array
+                fontGcodeLineIndex[currentCharASCII].line_num = charGcodeLength;
             }
         }
+        // calculate the current line number
         index_counter += 1;
     }
     // reset the file pointer to beginning
@@ -225,45 +251,63 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
     return index_counter;
 }
 
+// transfer the font data in plain text to cache data stored in memory
 int createFontDataCache(FILE *filePointer, int fontGcodeData[])
 {
+    // reset the file pointe again for sure its at the start of file
     rewind(filePointer);
+    // set read line buffer
     char fontReadBuff[255];
-    // use this to reset the position of filepointer
+    // record the index position for easier check
     int index_counter = 0;
-    int currentBuffCharPos;
+    // to accept the result from the convertion function
+    // which are the char's ASCII number and the g-code line length of this character
+    int startPosOfNextConvert;
     int *bufferCharPosPt;
     int tempResult;
+    // get one line of the font file
     while (fgets(fontReadBuff, 255, (FILE*)filePointer))
     {
-        currentBuffCharPos = 0;
-        bufferCharPosPt = &currentBuffCharPos;
+        // reset the position to start
+        startPosOfNextConvert = 0;
+        bufferCharPosPt = &startPosOfNextConvert;
+        // each line is construct by 3 int numbers
+        // use a for loop to read the int in one line
         for (int i = 0; i < 3; i++)
         {
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 6, &tempResult))
+            // convert the numbers and move the CharPos to next start in the buffer
+            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &tempResult))
             {
+                // saved it in to the pre allocated memory, each is 3* line number + number position
                 fontGcodeData[3*index_counter + i] = tempResult;
             }
             else
             {
-                // failure generated
+                // failure generated if the converted function failed
+                // export the error message to user
                 printf("Format Error Found in Line %d;\n", (index_counter+1));
+                // record the error
                 index_counter = -1;
+                // exit loop
                 break;
             }
         }
+        // if any error generated in this loop, exit the whole function
         if (index_counter < 0)
         {
             break;
         }
         else
         {
+            // set the counter to correct position
             index_counter += 1;
         }
     }
+    // return status
     return index_counter;
 }
 
+// a hard coded initial for the writing machine
 int initializeWritingMachine(char commandBuffer[])
 {
     //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
@@ -276,70 +320,93 @@ int initializeWritingMachine(char commandBuffer[])
     return 0;
 }
 
-int generateCharGcodeCommand(int charAsciiNum, double *tempOffsetX, double *tempOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler)
+// execute the G code for a input Character
+int generateCharGcodeCommand(int charAsciiNum, double *selectedOffsetX, double *selectedOffsetY, char commandBuffer[], int fontDataCache[], struct FontIndex fontIndexArray[], double Scaler)
 {
+    // variables to store the last g command code which is next offset 
     double currentFontWidth = 0;
     double currentFontHeight = 0;
-    int tempLineNum = 0;
-    int penStatus = 0; // reset to 0 for each input
+    // the tempory line number to store which line is used
+    int currentExecutedLineNum = 0;
+    // the status of the Z position, deine if pen is up or down
+    int penZAxisStatus = 0; // reset to 0 for each input
     // add a error handling here to avoid non character g code
+    // check this char do have some g code to output
     if (fontIndexArray[charAsciiNum].start_line >= 0)
     {
         // set the machine to offset with pen up
         sprintf (commandBuffer, "S0\n");
         SendCommands(commandBuffer);
-        sprintf (commandBuffer, "G0 X%.3f Y%.3f F1000\n", *tempOffsetX, *tempOffsetY);
+        // move the pen to the default offset position to avoid any problem which might occur
+        sprintf (commandBuffer, "G0 X%.3f Y%.3f F1000\n", *selectedOffsetX, *selectedOffsetY);
         SendCommands(commandBuffer);
+        // use a for loop to execute the gcode stored in cache
         for (int exeCommand = 0; exeCommand < fontIndexArray[charAsciiNum].line_num; exeCommand++)
         {
-            tempLineNum = fontIndexArray[charAsciiNum].start_line + exeCommand + 1;
-            if (fontDataCache[tempLineNum * 3 + 2] != penStatus)
+            // move the line to the absolute position in memory cache using the relative line number and cached index
+            currentExecutedLineNum = fontIndexArray[charAsciiNum].start_line + exeCommand + 1;
+            // if the target pen status (up and down) is not same as current, 
+            // send the pen down command seperately before executing the position move command
+            if (fontDataCache[currentExecutedLineNum * 3 + 2] != penZAxisStatus)
             {
-                sprintf (commandBuffer, "S%d\n", fontDataCache[tempLineNum * 3 + 2] * 1000);
+                // send pen move down/up command
+                sprintf (commandBuffer, "S%d\n", fontDataCache[currentExecutedLineNum * 3 + 2] * 1000);
                 SendCommands(commandBuffer);
-                penStatus = fontDataCache[tempLineNum * 3 + 2];
+                // set the pen status to the target pen status
+                penZAxisStatus = fontDataCache[currentExecutedLineNum * 3 + 2];
                 // keep in same line
                 exeCommand -= 1;
             }
             else
             {
-                sprintf (commandBuffer, "G%d X%.3f Y%.3f\n", penStatus, *tempOffsetX + Scaler * fontDataCache[tempLineNum * 3], *tempOffsetY + Scaler * fontDataCache[tempLineNum * 3 + 1]);
+                // if pen status didnt changed, just send the command to move the position 
+                // product the scaler to generate the correct position command 
+                sprintf (commandBuffer, "G%d X%.3f Y%.3f\n", penZAxisStatus, *selectedOffsetX + Scaler * fontDataCache[currentExecutedLineNum * 3], *selectedOffsetY + Scaler * fontDataCache[currentExecutedLineNum * 3 + 1]);
                 SendCommands(commandBuffer);
             }
+            // if the line is the last line of current character's g code, thus, just transfer the position into the offset moving variables
             if (exeCommand == fontIndexArray[charAsciiNum].line_num - 1)
             {
-                // last line
-                currentFontWidth = Scaler * fontDataCache[tempLineNum * 3];
-                currentFontHeight = Scaler * fontDataCache[tempLineNum * 3 + 1];
+                // set the position use the global scaler
+                currentFontWidth = Scaler * fontDataCache[currentExecutedLineNum * 3];
+                currentFontHeight = Scaler * fontDataCache[currentExecutedLineNum * 3 + 1];
             }
         }
     }
     else
     {
+        // if this code didnt have a g-code, just using the default command and move it to next position
         // jump to next words position if this code is not defined
         currentFontWidth = Scaler * _DEFAULT_FONT_WIDTH_;
         currentFontHeight = 0;
     }
-    updateCharactorOffsetPosition(tempOffsetX, tempOffsetY, currentFontWidth, currentFontHeight, Scaler);
+    // call the function to update the offset for next character
+    updateCharactorOffsetPosition(selectedOffsetX, selectedOffsetY, currentFontWidth, currentFontHeight, Scaler);
     return 1;
 }
 
-int updateCharactorOffsetPosition(double *tempOffsetX, double *tempOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
+// flash the default offset for next character
+int updateCharactorOffsetPosition(double *selectedOffsetX, double *selectedOffsetY, double commandWidthChange, double commandHeightChange, double globalScaler)
 {
-    if ((*tempOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
+    // check if its meet the max available line width
+    if ((*selectedOffsetX + commandWidthChange) < globalScaler * _MAX_LINE_WIDTH_)
     {
-        *tempOffsetX += commandWidthChange;
+        // if not exceed the limits, add the x increasement to the global offset
+        *selectedOffsetX += commandWidthChange;
     }
     else
     {
-        // line change
-        *tempOffsetY -= globalScaler * _LINE_HEIGHT_OFFSET_;
-        *tempOffsetX = 0;
+        // the width is exceed, 
+        // line change is required
+        *selectedOffsetY -= globalScaler * _LINE_HEIGHT_OFFSET_;
+        *selectedOffsetX = 0;
     }
     if (commandHeightChange != 0)
     {
-        *tempOffsetY += commandHeightChange;
-        *tempOffsetX = 0;
+        // if have height change, (example: \n)
+        // the x should be move back to the start
+        *selectedOffsetY += commandHeightChange;
+        *selectedOffsetX = 0;
     }
     return 1;
 }

@@ -196,7 +196,7 @@ void SendCommands (char *buffer )
 int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
 {
     // the buffer for storing the current line
-    char fontReadBuff[255];
+    char fontFileReadBuff[255];
     // use this to reset the position of filepointer
     int index_counter = 0;
     // to accept the result from the convertion function
@@ -208,20 +208,20 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
     // the pointer for transmit startPosOfNextConvert
     int *bufferCharPosPt;
     // get one line of the font file
-    while (fgets(fontReadBuff, 255, (FILE*)filePointer))
+    while (fgets(fontFileReadBuff, 255, (FILE*)filePointer))
     {
         // reset the position variables to 0 for a new circle
         startPosOfNextConvert = 0;
         charGcodeLength = 0;
         // check if this line is start with 999, which means this is the line define the start of a char and its g-code length
-        if (fontReadBuff[0] == (char)57 && fontReadBuff[1] == (char)57 && fontReadBuff[2] == (char)57 )
+        if (fontFileReadBuff[0] == (char)57 && fontFileReadBuff[1] == (char)57 && fontFileReadBuff[2] == (char)57 )
         {
             // jump position to 4, because its 999 ASCII LENGTH
             // ascii number starts from position 5
             startPosOfNextConvert = 4;
             bufferCharPosPt = &startPosOfNextConvert;
             // convert the char's ascii num (max 128), max length = 3, start position is 4; (999 XXX)
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &currentCharASCII))
+            if (convertCharArrayToInt(fontFileReadBuff, bufferCharPosPt, 20, &currentCharASCII))
             {
                 //check if the converted result is between 0 -127
                 if (currentCharASCII >= 0 && currentCharASCII < 128)
@@ -237,7 +237,7 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
                 }
             }
             // if its correct, jump to the start of the length and convert it to integer
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &charGcodeLength))
+            if (convertCharArrayToInt(fontFileReadBuff, bufferCharPosPt, 20, &charGcodeLength))
             {
                 // record the length into the index array
                 fontGcodeLineIndex[currentCharASCII].line_num = charGcodeLength;
@@ -252,12 +252,12 @@ int generateFontIndex(FILE *filePointer, struct FontIndex fontGcodeLineIndex[])
 }
 
 // transfer the font data in plain text to cache data stored in memory
-int createFontDataCache(FILE *filePointer, int fontGcodeData[])
+int createFontDataCache(FILE *filePointer, int fontGcodeCache[])
 {
     // reset the file pointe again for sure its at the start of file
     rewind(filePointer);
     // set read line buffer
-    char fontReadBuff[255];
+    char fontFileReadBuff[255];
     // record the index position for easier check
     int index_counter = 0;
     // to accept the result from the convertion function
@@ -266,7 +266,7 @@ int createFontDataCache(FILE *filePointer, int fontGcodeData[])
     int *bufferCharPosPt;
     int tempResult;
     // get one line of the font file
-    while (fgets(fontReadBuff, 255, (FILE*)filePointer))
+    while (fgets(fontFileReadBuff, 255, (FILE*)filePointer))
     {
         // reset the position to start
         startPosOfNextConvert = 0;
@@ -276,10 +276,10 @@ int createFontDataCache(FILE *filePointer, int fontGcodeData[])
         for (int i = 0; i < 3; i++)
         {
             // convert the numbers and move the CharPos to next start in the buffer
-            if (convertCharArrayToInt(fontReadBuff, bufferCharPosPt, 20, &tempResult))
+            if (convertCharArrayToInt(fontFileReadBuff, bufferCharPosPt, 20, &tempResult))
             {
                 // saved it in to the pre allocated memory, each is 3* line number + number position
-                fontGcodeData[3*index_counter + i] = tempResult;
+                fontGcodeCache[3*index_counter + i] = tempResult;
             }
             else
             {

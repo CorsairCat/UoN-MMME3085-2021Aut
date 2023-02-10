@@ -1,5 +1,5 @@
 # MMME3085 Project - Mac Survival Kit
-### This source code fits the 2022 Spring UoN MMME 3085 Mechtronics Course
+### This source code fits the 2021 Autumn UoN MMME 3085 Mechtronics Course
 ### There is a windows.h could be used on macOS to do some of the work (mainly convert some system level timing)
 ### I hate writing makefiles or cmake so the functions are all been written inside .h (not a standard approach!!)
 ## Project List
